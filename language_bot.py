@@ -22,7 +22,7 @@ generation_config = {
     "response_mime_type": "text/plain",
 }
 
-model = genai.GenerativeConfig("gemini-2.0-flash", generation_config=generation_config)
+model = genai.GenerativeModel("gemini-2.0-flash", generation_config=generation_config)
 
 # Load prompt from JSON file
 with open('prompt2.json', 'r') as file:
