@@ -43,9 +43,11 @@ streamlit run language_bot.py
 | `timestamp`       | DATETIME       | Timestamp of last occurrence             |  
 
 ## 🚧 Future Improvements  
-- Support for more languages  
-- Speech-to-text and text-to-speech integration  
-- Enhanced feedback with long-term progress tracking  
-- Gamification and streaks.
-- Multi AI Agents for optimization.
-
+-More-language support
+-Speech-to-text and text-to-speech integration
+-Adaptive difficulty levels based on user proficiency
+-Personalized feedback and improvement suggestions
+-Gamification (points, badges, rewards)
+-User profiles and progress tracking
+-Real-time pronunciation and accent feedback
+-Long-term memory for personalized conversations
