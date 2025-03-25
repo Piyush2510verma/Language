@@ -44,6 +44,7 @@ streamlit run language_bot.py
 
 ## 🚧 Future Improvements  
 -More-language support
+
 -Speech-to-text and text-to-speech integration
 -Adaptive difficulty levels based on user proficiency
 -Personalized feedback and improvement suggestions
