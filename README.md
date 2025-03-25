@@ -1,21 +1,51 @@
-# 🌍 Conversational Language Learning Bot
+# 🌍 Conversational Language Learning Bot  
 
-A conversational chatbot built with Streamlit, Gemini API, and SQLite to help users learn a new language through interactive conversation and mistake correction.
+An AI-powered chatbot built with Streamlit, Gemini API, and SQLite to help users learn a new language through interactive conversation and mistake correction.  
 
-## 🚀 Features
-✅ Natural language conversation using Gemini API  
-✅ Mistake detection and correction  
-✅ Improvement suggestions based on mistake patterns  
-✅ Session-based context tracking  
-✅ Stored mistake history using SQLite  
+## 🚀 Features  
+✅ Real-time conversation with AI using Gemini API  
+✅ Mistake detection and correction in user input  
+✅ Personalized feedback based on mistake patterns  
+✅ Session-based context management  
+✅ SQLite database to store and analyze mistakes  
 
-## 🏗️ Architecture
-1. Streamlit UI for chat interface  
-2. Gemini API for language processing  
-3. SQLite for tracking and analyzing mistakes  
+## 🏗️ Architecture  
+1. **Streamlit UI** – For real-time conversation and user interaction  
+2. **Gemini API** – For language processing and mistake detection  
+3. **SQLite** – For storing and analyzing mistake history  
 
-## 📦 Installation
+## 📦 Installation  
 ```bash
-git clone https://github.com/piyush2510verma/language-bot.git
-cd language-learning-bot
-pip install -r requirements.txt
+git clone https://github.com/piyush2510verma/language.git  
+cd language-learning-bot  
+pip install -r requirements.txt  
+```
+
+## 🌐 Usage  
+```bash
+streamlit run main.py  
+```
+
+## 🧠 How It Works  
+1. **User Setup:** User sets known and target languages along with proficiency level.  
+2. **Conversation:** User inputs are processed and context is maintained across the session.  
+3. **Mistake Detection:** Gemini analyzes user input for mistakes and suggests corrections.  
+4. **Feedback:** Mistakes are stored in SQLite and improvement suggestions are generated.  
+
+## 📊 Database Schema  
+| Column           | Type         | Description                               |  
+|------------------|--------------|-------------------------------------------|  
+| `id`             | INTEGER (PK)  | Auto-incremented ID                      |  
+| `user_input`      | TEXT          | Original user input                      |  
+| `mistake_type`    | TEXT          | Type of mistake (e.g., Grammar)          |  
+| `correct_answer`  | TEXT          | Corrected version of user input          |  
+| `frequency`       | INTEGER        | Frequency of mistake                     |  
+| `timestamp`       | DATETIME       | Timestamp of last occurrence             |  
+
+## 🚧 Future Improvements  
+- Support for more languages  
+- Speech-to-text and text-to-speech integration  
+- Enhanced feedback with long-term progress tracking  
+- Gamification and streaks.
+- Multi AI Agents for optimization.
+
