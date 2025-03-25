@@ -16,6 +16,6 @@ A conversational chatbot built with Streamlit, Gemini API, and SQLite to help us
 
 ## 📦 Installation
 ```bash
-git clone https://github.com/your-username/language-learning-bot.git
+git clone https://github.com/piyush2510verma/language-bot.git
 cd language-learning-bot
 pip install -r requirements.txt
