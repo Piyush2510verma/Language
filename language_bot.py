@@ -11,22 +11,14 @@ import re
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Initialize Gemini API
-genai.configure(api_key=GEMINI_API_KEY)
-
-generation_config = {
-    "temperature": 1,
-    "top_p": 0.95,
-    "top_k": 40,
-    "max_output_tokens": 8192,
-    "response_mime_type": "text/plain",
-}
-
-model = genai.GenerativeModel("gemini-2.0-flash", generation_config=generation_config)
 
 # Load prompt from JSON file
 with open('prompt2.json', 'r') as file:
     prompt_data = json.load(file)
+
+# Initialize Gemini API
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel("gemini-2.0-flash")
 
 # Create SQLite database and table
 conn = sqlite3.connect('database.db', check_same_thread=False)
@@ -43,7 +35,7 @@ CREATE TABLE IF NOT EXISTS mistakes (
 ''')
 conn.commit()
 
-# ✅ Initialize session state
+# Initialize session state
 if 'conversation' not in st.session_state:
     st.session_state.conversation = []
 if 'language_pair' not in st.session_state:
@@ -58,6 +50,7 @@ def store_mistake(user_input, mistake_type, correct_answer):
     result = c.fetchone()
 
     if result:
+        # If mistake exists, increment frequency
         mistake_id, frequency = result
         c.execute('''
             UPDATE mistakes 
@@ -65,6 +58,7 @@ def store_mistake(user_input, mistake_type, correct_answer):
             WHERE id = ?
         ''', (frequency + 1, datetime.utcnow().isoformat(), mistake_id))
     else:
+        # Insert new mistake
         c.execute('''
             INSERT INTO mistakes (user_input, mistake_type, correct_answer) 
             VALUES (?, ?, ?)
@@ -94,17 +88,19 @@ def analyze_mistake(user_input):
     """
 
     try:
-        response = model.generate_content([{"role": "user", "parts": [{"text": prompt}]}])
+        response = model.generate_content([
+            {"role": "user", "parts": [{"text": prompt}]}
+        ])
         result = response.text.strip()
 
         # ✅ Extract only the JSON part using regex
         json_match = re.search(r'\{.*\}', result, re.DOTALL)
         if json_match:
-            result_json = json.loads(json_match.group(0))
+            result_json = json.loads(json_match.group(0))  # Safe parsing
             mistake_type = result_json.get('mistake_type')
             correct_answer = result_json.get('correct_answer')
 
-            # ✅ STRONGER CHECK: Ensure values are not empty or "None"
+             # ✅ STRONGER CHECK: Ensure values are not empty or "None"
             if isinstance(mistake_type, str) and mistake_type.strip().lower() not in ["", "none"] and \
                isinstance(correct_answer, str) and correct_answer.strip():
                 store_mistake(user_input, mistake_type, correct_answer)
@@ -130,6 +126,7 @@ def generate_mistake_summary():
     if not mistake_summary:
         return "You haven’t made any mistakes yet. Keep practicing!"
 
+    # Format the summary
     summary = "### 📊 Mistake Summary & Focus Areas:\n"
     focus_areas = []
 
@@ -142,6 +139,7 @@ def generate_mistake_summary():
         elif mistake_type == "Pronunciation":
             focus_areas.append("Practice pronunciation with native audio examples.")
 
+    # Remove duplicates and format focus areas
     focus_areas = list(set(focus_areas))
     if focus_areas:
         summary += "\n### 🎯 Suggested Areas for Improvement:\n"
@@ -149,6 +147,11 @@ def generate_mistake_summary():
             summary += f"- {area}\n"
 
     return summary
+
+# ✅ Step 5: Show Mistake Summary Button
+if st.button("Generate Improvement Summary"):
+    summary = generate_mistake_summary()
+    st.markdown(summary)
 
 # ✅ Function to generate conversation response
 def generate_response(user_input):
@@ -180,65 +183,55 @@ def generate_response(user_input):
         return message
     except Exception as e:
         return f"❌ Error: {e}"
-    
+
 # ✅ Streamlit UI Setup
 st.title("🌍 Conversational Language Learning Bot")
 
 # Step 1: Get known and target language
 if not st.session_state.language_pair:
-    with st.form("start_form"):
-        known_language = st.text_input("Enter the language you know:")
-        target_language = st.text_input("Enter the language you want to learn:")
-        level = st.selectbox("Select your level:", ["Beginner", "Intermediate", "Advanced", "Complete Beginner"])
-        start_button = st.form_submit_button("Start Learning")
+    known_language = st.text_input("Enter the language you know:")
+    target_language = st.text_input("Enter the language you want to learn:")
+    level = st.selectbox("Select your level:", ["Beginner", "Intermediate", "Advanced", "Complete Beginner"])
 
-        if start_button and known_language and target_language:
-            st.session_state.language_pair = (known_language.capitalize(), target_language.capitalize(), level)
-            st.session_state.conversation.append(
-                f"👤 Known Language: {known_language}, Target Language: {target_language}, Level: {level}"
-            )
-            st.success(f"✅ Starting conversation in {target_language} for a {level} learner!")
+    if known_language and target_language and st.button("Start Learning"):
+        st.session_state.language_pair = (known_language.capitalize(), target_language.capitalize(), level)
+        st.session_state.conversation.append(
+            f"👤 Known Language: {known_language}, Target Language: {target_language}, Level: {level}"
+        )
+        st.success(f"✅ Starting conversation in {target_language} for a {level} learner!")
 
 # Step 2: Continuous back-and-forth conversation
 if st.session_state.language_pair:
-    with st.form("conversation_form"):
-        user_input = st.text_input(f"💬 Talk to me in {st.session_state.language_pair[1]}:")
-        send_button = st.form_submit_button("Send")
+    user_input = st.text_input(f"💬 Talk to me in {st.session_state.language_pair[1]}:")
 
-        if send_button and user_input:
-            st.session_state.conversation.append(f"👤 {user_input}")
+    if user_input:
+        # Add user input to conversation history
+        st.session_state.conversation.append(f"👤 {user_input}")
 
-            # ✅ Generate AI response
-            context = "\n".join(st.session_state.conversation[-10:])
-            prompt = f"""
-            System: {prompt_data['systemRole']}
-            Objective: {prompt_data['systemRole']}
-            Context:
-            {context}
-            
-            User: {user_input}
-            AI:
-            """
-            response = model.generate_content([{"role": "user", "parts": [{"text": prompt}]}])
-            message = response.text.strip()
+        # Get AI response
+        response = generate_response(user_input)
+        st.session_state.conversation.append(f"🤖 {response}")
 
-            # ✅ Analyze mistakes
-            mistake_type, correct_answer = analyze_mistake(user_input)
-            if mistake_type and correct_answer:
-                message += f"\n\n🚨 **Correction:** `{correct_answer}` *(Type: {mistake_type})*"
+        # 🔥 Display last 6 messages at the TOP
+        st.markdown("---")
+        for msg in reversed(st.session_state.conversation[-6:]):
+            if "👤" in msg:
+                st.markdown(f"**👤 {msg.replace('👤', '')}**")
+            else:
+                st.markdown(f"**🤖 {msg.replace('🤖', '')}**")
+        st.markdown("---")
 
-            st.session_state.conversation.append(f"🤖 {message}")
-
-    # ✅ Display last 6 messages
-    for msg in reversed(st.session_state.conversation[-6:]):
-        st.markdown(msg)
-
-# ✅ Step 3: Show mistakes when clicked
+# ✅ Step 3: Show mistakes only when the button is clicked
 if st.button("View Mistakes"):
+    st.session_state.show_mistakes = not st.session_state.show_mistakes
+
+if st.session_state.show_mistakes:
+    st.subheader("📌 Common Mistakes:")
     mistakes = get_mistakes()
     if mistakes:
         for m in mistakes:
-            st.markdown(f"**❌ {m[1]}** → ✅ {m[3]} *(×{m[4]})*")
+            user_input, mistake_type, correct_answer, frequency = m[1], m[2], m[3], m[4]
+            st.markdown(f"**❌ {user_input}** → ✅ {correct_answer} *(×{frequency})*")
     else:
         st.write("No mistakes recorded yet.")
 
@@ -246,12 +239,8 @@ if st.button("View Mistakes"):
 if st.button("Reset Conversation"):
     st.session_state.conversation = []
     st.session_state.language_pair = None
+    st.session_state.show_mistakes = False
     st.success("✅ Conversation reset!")
-
-# ✅ Step 5: Generate mistake summary
-if st.button("Generate Improvement Summary"):
-    summary = generate_mistake_summary()
-    st.markdown(summary)
 
 # ✅ Close connection on app exit
 conn.close()
