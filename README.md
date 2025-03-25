@@ -42,13 +42,16 @@ streamlit run language_bot.py
 | `frequency`       | INTEGER        | Frequency of mistake                     |  
 | `timestamp`       | DATETIME       | Timestamp of last occurrence             |  
 
-## 🚧 Future Improvements  
--More-language support
+## 🚧 Future Improvements
+- Multi-language support
+- Speech-to-text and text-to-speech integration
+- Adaptive difficulty levels based on user proficiency
+- Personalized feedback and improvement suggestions
+- Gamification (points, badges, rewards)
+- User profiles and progress tracking
+- Real-time pronunciation and accent feedback
+- Social learning features (chatrooms, peer interaction)
+- Advanced mistake analysis and custom learning paths
+- Integration with external educational resources
+- Long-term memory for personalized conversations
 
--Speech-to-text and text-to-speech integration
--Adaptive difficulty levels based on user proficiency
--Personalized feedback and improvement suggestions
--Gamification (points, badges, rewards)
--User profiles and progress tracking
--Real-time pronunciation and accent feedback
--Long-term memory for personalized conversations
