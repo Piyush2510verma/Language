@@ -17,7 +17,7 @@ An AI-powered chatbot built with Streamlit, Gemini API, and SQLite to help users
 ## 📦 Installation  
 ```bash
 git clone https://github.com/piyush2510verma/Language.git  
-cd language-learning-bot  
+cd Language 
 pip install -r requirements.txt  
 ```
 
